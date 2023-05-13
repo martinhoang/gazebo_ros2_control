@@ -202,34 +202,43 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
       impl_->model_nh_->get_logger(), "No parameter file provided. Configuration might be wrong");
   }
 
-  if (sdf->HasElement("ros")) {
-    sdf = sdf->GetElement("ros");
+  //! Redundancy since these tags have been parsed earlier when
+  //! gazebo_ros::Node::Get(sdf) was called when this node was created
+  //! Doing this messed things up like reported in issue #127
+  //! Because the tags will parsesd as arguments for the node context,
+  //! but the node context was retrieved from get_rcl_context() and unfortunately it is
+  //! actually the same and shared among all the plugin nodes created in gazebo.
+  //! All nodes (from all plugins of all robots in gazebo) will have namespace messed up
+  //! by this modification of the ros node context
+  // if (sdf->HasElement("ros")) {
+  //   sdf = sdf->GetElement("ros");
 
-    // Set namespace if tag is present
-    if (sdf->HasElement("namespace")) {
-      std::string ns = sdf->GetElement("namespace")->Get<std::string>();
-      // prevent exception: namespace must be absolute, it must lead with a '/'
-      if (ns.empty() || ns[0] != '/') {
-        ns = '/' + ns;
-      }
-      std::string ns_arg = std::string("__ns:=") + ns;
-      arguments.push_back(RCL_REMAP_FLAG);
-      arguments.push_back(ns_arg);
-    }
+  //   // Set namespace if tag is present  //! Doing this messed things up like reported in issue #127
 
-    // Get list of remapping rules from SDF
-    if (sdf->HasElement("remapping")) {
-      sdf::ElementPtr argument_sdf = sdf->GetElement("remapping");
+  //   if (sdf->HasElement("namespace")) {
+  //     std::string ns = sdf->GetElement("namespace")->Get<std::string>();
+  //     // prevent exception: namespace must be absolute, it must lead with a '/'
+  //     if (ns.empty() || ns[0] != '/') {
+  //       ns = '/' + ns;
+  //     }
+  //     std::string ns_arg = std::string("__ns:=") + ns;
+  //     arguments.push_back(RCL_REMAP_FLAG);
+  //     arguments.push_back(ns_arg);
+  //   }
 
-      arguments.push_back(RCL_ROS_ARGS_FLAG);
-      while (argument_sdf) {
-        std::string argument = argument_sdf->Get<std::string>();
-        arguments.push_back(RCL_REMAP_FLAG);
-        arguments.push_back(argument);
-        argument_sdf = argument_sdf->GetNextElement("remapping");
-      }
-    }
-  }
+  //   // Get list of remapping rules from SDF
+  //   if (sdf->HasElement("remapping")) {
+  //     sdf::ElementPtr argument_sdf = sdf->GetElement("remapping");
+
+  //     arguments.push_back(RCL_ROS_ARGS_FLAG);
+  //     while (argument_sdf) {
+  //       std::string argument = argument_sdf->Get<std::string>();
+  //       arguments.push_back(RCL_REMAP_FLAG);
+  //       arguments.push_back(argument);
+  //       argument_sdf = argument_sdf->GetNextElement("remapping");
+  //     }
+  //   }
+  // }
 
   std::vector<const char *> argv;
   for (const auto & arg : arguments) {

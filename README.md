@@ -1,3 +1,7 @@
+# Bug fixed
+- Cannot spawn multiple robots (with or without the same description) due to namespace collision as described in issue #127. Fixed like suggestion in #127 comments and explain in my own comments in gazebo_ros2_control_plugin.cpp
+
+
 # gazebo_ros2_control
 
 This is a ROS 2 package for integrating the `ros2_control` controller architecture with the [Gazebo](http://gazebosim.org/) simulator.
